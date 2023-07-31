@@ -2,13 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import {App} from './App';
 import reportWebVitals from './reportWebVitals';
-import {createServer} from 'miragejs';
+import {Model, createServer} from 'miragejs';
 
 createServer({
-  routes(){
-    this.namespace = 'api';
-    this.get('transactions', () => {
-      return [
+  models:{
+    transaction: Model
+  },
+  seeds(server){
+    server.db.loadData({
+      transactions:[
         {
           id: 1,
           title: "transactions 1",
@@ -33,6 +35,18 @@ createServer({
           createAt:new Date()
         }
       ]
+    })
+  },
+  routes(){
+    this.namespace = 'api';
+
+    this.get('transactions', () => {
+      return this.schema.all('transaction')
+    });
+
+    this.post('transactions', (schema, request) => {
+      const data = JSON.parse(request.requestBody);
+      return schema.create('transaction',data);
     })
   }
 })
